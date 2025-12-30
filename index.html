@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Apple Clock</title>
+    <title>Apple Clock - Optimized Layout</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,6 +25,11 @@
             --font-family: 'SF Pro Display', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             --transition-speed: 0.6s;
             --easing: cubic-bezier(0.25, 1, 0.5, 1);
+            
+            /* --- 這裡控制控制面板與手錶之間的間距 --- */
+            --controls-to-watch-gap: 80px; 
+            /* --- 這裡控制頂部距離 --- */
+            --top-safe-area: 45px;
         }
 
         body.env-light {
@@ -48,7 +53,6 @@
             overflow: hidden; position: fixed;
         }
 
-        /* --- 穩定版 Loader --- */
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000;
@@ -64,7 +68,6 @@
         
         .loading-bar-fill { 
             width: 0%; height: 100%; background: #fff; 
-            /* 確保 transition 屬性正確 */
             transition: width 2s cubic-bezier(0.22, 1, 0.36, 1); 
             will-change: width;
         }
@@ -77,11 +80,15 @@
             position: relative;
         }
 
-        /* --- UI 元件 --- */
+        /* --- UI 控制元件佈局調整 --- */
         .controls-wrapper {
-            position: relative; margin-top: 45px; z-index: 1000;
+            position: relative; 
+            margin-top: var(--top-safe-area); 
+            margin-bottom: var(--controls-to-watch-gap); /* 這裡控制下方的間距 */
+            z-index: 1000;
             display: flex; flex-direction: column; gap: 14px; flex-shrink: 0;
         }
+        
         .control-item { display: flex; flex-direction: column; align-items: center; }
         .label { font-size: 10px; font-weight: 800; color: var(--env-text); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; transition: color 0.3s; }
         .control-group {
@@ -99,8 +106,27 @@
         }
         .btn.active { background: var(--env-btn-active); color: var(--env-btn-text); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 
-        .watch-viewport { flex-grow: 1; display: flex; justify-content: center; align-items: center; width: 100%; overflow: visible; position: relative; }
-        .watch-scale-container { width: 320px; height: 390px; transform-origin: center center; transition: transform 0.1s linear; display: flex; justify-content: center; align-items: center; will-change: transform; }
+        /* 視窗區域 */
+        .watch-viewport { 
+            flex-grow: 1; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; /* 改為 flex-start 配合 margin-top 比較精確控制 */
+            width: 100%; 
+            overflow: visible; 
+            position: relative; 
+        }
+
+        .watch-scale-container { 
+            width: 320px; 
+            height: 390px; 
+            transform-origin: top center; /* 縮放起點改為頂部，這樣間距調整會更直覺 */
+            transition: transform 0.1s linear; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            will-change: transform; 
+        }
 
         .watch-case {
             position: relative; width: 320px; height: 390px; background-color: #000;
@@ -179,17 +205,17 @@
         <div class="watch-viewport">
             <div class="watch-scale-container" id="watch-scaler">
                 <div class="watch-case">
-                    <div class="date-info" id="full-date">2025-12-30 (TUE)</div>
+                    <div class="date-info" id="full-date">---- -- -- (---)</div>
                     <div class="bottom-line"></div>
                     
                     <div class="flux-container">
                         <div class="row">
-                            <div class="digit-box"><div class="digit-style digit-base" id="h1-b">1</div></div>
+                            <div class="digit-box"><div class="digit-style digit-base" id="h1-b">0</div></div>
                             <div class="digit-box"><div class="digit-style digit-base" id="h2-b">0</div></div>
                         </div>
                         <div class="row">
                             <div class="digit-box"><div class="digit-style digit-base" id="m1-b">0</div></div>
-                            <div class="digit-box"><div class="digit-style digit-base" id="m2-b">9</div></div>
+                            <div class="digit-box"><div class="digit-style digit-base" id="m2-b">0</div></div>
                         </div>
                     </div>
 
@@ -197,12 +223,12 @@
                         <div class="mask-content-fix">
                             <div class="flux-container">
                                 <div class="row">
-                                    <div class="digit-box"><div class="digit-style digit-fill" id="h1-f">1</div></div>
+                                    <div class="digit-box"><div class="digit-style digit-fill" id="h1-f">0</div></div>
                                     <div class="digit-box"><div class="digit-style digit-fill" id="h2-f">0</div></div>
                                 </div>
                                 <div class="row">
                                     <div class="digit-box"><div class="digit-style digit-fill" id="m1-f">0</div></div>
-                                    <div class="digit-box"><div class="digit-style digit-fill" id="m2-f">9</div></div>
+                                    <div class="digit-box"><div class="digit-style digit-fill" id="m2-f">0</div></div>
                                 </div>
                             </div>
                         </div>
@@ -222,36 +248,30 @@
     </div>
 
     <script>
-        // 核心啟動邏輯：確保 Loader 正常運作
         window.addEventListener('load', () => {
             const fill = document.getElementById('loading-fill');
             const loader = document.getElementById('loader');
             const main = document.getElementById('main-content');
             
-            // 1. 強制觸發重繪，確保 CSS transition 生效
             void fill.offsetWidth; 
             fill.style.width = '100%';
             
-            // 2. 2.2秒後進入主畫面 (比動畫長一點點以確保完成)
             setTimeout(() => {
                 loader.style.opacity = '0';
-                loader.style.pointerEvents = 'none'; // 關鍵：讓滑鼠能穿透
+                loader.style.pointerEvents = 'none';
                 main.style.opacity = '1';
                 
-                // 3. 初始化系統
                 handleResize(); 
                 requestAnimationFrame(clockLoop);
                 
-                // 4. 清理 Loader DOM 以釋放記憶體
                 setTimeout(() => loader.remove(), 1000);
             }, 2200);
         });
 
-        // 智慧縮放邏輯
         function handleResize() {
             const scaler = document.getElementById('watch-scaler');
             const controls = document.querySelector('.controls-wrapper');
-            const padding = 30;
+            const padding = 20; 
             
             const baseW = 320;
             const baseH = 390;
@@ -261,13 +281,14 @@
             const controlsRect = controls.getBoundingClientRect();
             const controlsBottom = controlsRect.bottom;
 
+            // 計算扣除控制面板後剩餘的高度
             const availableH = screenH - controlsBottom - padding;
-            const availableW = screenW - padding;
+            const availableW = screenW - (padding * 2);
 
             let scale = Math.min(availableW / baseW, availableH / baseH);
             
-            if (scale > 1) scale = 1;
-            if (scale < 0.25) scale = 0.25;
+            if (scale > 1.2) scale = 1.2; // 稍微允許放大一點
+            if (scale < 0.2) scale = 0.2;
 
             scaler.style.transform = `scale(${scale})`;
         }
@@ -275,7 +296,6 @@
         window.addEventListener('resize', handleResize);
         window.addEventListener('orientationchange', () => setTimeout(handleResize, 100));
 
-        // 系統切換
         function setEnv(env) {
             document.body.classList.toggle('env-light', env === 'light');
             document.getElementById('env-light-btn').classList.toggle('active', env === 'light');
@@ -289,7 +309,6 @@
             document.getElementById('btn-outline').classList.toggle('active', mode === 'outline');
         }
 
-        // 高效能時鐘循環
         function clockLoop() {
             const now = new Date();
             
@@ -306,7 +325,6 @@
             updateDigit('m1', mStr[0]);
             updateDigit('m2', mStr[1]);
 
-            // 極致平滑的毫秒級更新
             const s = now.getSeconds();
             const ms = now.getMilliseconds();
             const progress = ((s + ms / 1000) / 60) * 100;
