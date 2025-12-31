@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Apple Clock Flux Enhanced</title>
+    <title>Apple Clock</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,22 +13,34 @@
     
     <style>
         :root {
+            /* --- System Colors --- */
             --env-bg: #000000;
             --env-panel-bg: rgba(20, 20, 20, 0.6);
             --env-panel-border: rgba(255, 255, 255, 0.1);
             --env-text: #666;
             --env-btn-active: #ffffff;
             --env-btn-text: #000;
-            --flux-cyan: #00f2ff; 
-            --flux-pink: #ff2d85; 
+            
+            /* --- Default Theme Variables (Pink/Cyan) --- */
+            --flux-bg: #ff2d85;     
+            --flux-accent: #00f2ff; 
+            
             --outline-dark: #2a2a2a;
             --font-family: 'SF Pro Display', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             --transition-speed: 0.6s;
             --easing: cubic-bezier(0.25, 1, 0.5, 1);
             
-            --controls-to-watch-gap: 30px; 
-            --top-safe-area: 45px;
+            --controls-to-watch-gap: 25px; 
+            --top-safe-area: 40px;
         }
+        
+        /* --- Theme Definitions --- */
+        body.theme-1 { --flux-bg: #ff2d85; --flux-accent: #00f2ff; }
+        body.theme-2 { --flux-bg: #ff3b30; --flux-accent: #ffcc00; }
+        body.theme-3 { --flux-bg: #ffd60a; --flux-accent: #bf5af2; }
+        body.theme-4 { --flux-bg: #30d158; --flux-accent: #ff453a; }
+        body.theme-5 { --flux-bg: #0a84ff; --flux-accent: #ff9f0a; }
+
         body.env-light {
             --env-bg: #f2f2f7;
             --env-panel-bg: rgba(255, 255, 255, 0.65);
@@ -37,7 +49,9 @@
             --env-btn-active: #000000;
             --env-btn-text: #fff;
         }
+
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
             margin: 0; padding: 0;
             display: flex; flex-direction: column; align-items: center;
@@ -45,8 +59,12 @@
             background-color: var(--env-bg);
             font-family: var(--font-family);
             transition: background-color var(--transition-speed) var(--easing);
-            overflow: hidden; position: fixed;
+            overflow: hidden; 
+            position: fixed;
+            touch-action: none; 
         }
+
+        /* --- Loader Styles --- */
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000;
@@ -62,9 +80,11 @@
         
         .loading-bar-fill { 
             width: 0%; height: 100%; background: #fff; 
+            border-radius: 10px;
+            /* 確保 transition 設定正確 */
             transition: width 2s cubic-bezier(0.22, 1, 0.36, 1); 
-            will-change: width;
         }
+
         #main-content {
             opacity: 0;
             transition: opacity 1.2s ease-out;
@@ -73,24 +93,29 @@
             position: relative;
         }
         
-        /* --- UI Controls --- */
+        /* --- Controls --- */
         .controls-wrapper {
             position: relative; 
             margin-top: var(--top-safe-area); 
             margin-bottom: var(--controls-to-watch-gap);
             z-index: 1000;
-            display: flex; flex-direction: column; gap: 14px; flex-shrink: 0;
+            display: flex; flex-direction: column; gap: 12px; flex-shrink: 0;
         }
         .control-item { display: flex; flex-direction: column; align-items: center; }
         .label { font-size: 10px; font-weight: 800; color: var(--env-text); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; transition: color 0.3s; }
-        .control-group {
-            display: flex; background: var(--env-panel-bg);
-            padding: 4px; border-radius: 40px;
+        
+        .control-group, .color-group {
+            display: flex; 
+            background: var(--env-panel-bg);
+            border-radius: 40px;
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             border: 1px solid var(--env-panel-border);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
             transition: background 0.3s, border 0.3s;
         }
+        .control-group { padding: 4px; }
+        .color-group { padding: 6px 12px; gap: 8px; }
+        
         .btn {
             padding: 8px 24px; border-radius: 30px; border: none; background: transparent;
             color: var(--env-text); cursor: pointer; font-size: 11px; font-weight: 800;
@@ -98,7 +123,28 @@
         }
         .btn.active { background: var(--env-btn-active); color: var(--env-btn-text); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         
-        /* Watch Viewport */
+        /* --- Color Dots --- */
+        .color-dot {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            border: none; cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+            position: relative;
+        }
+        .color-dot:hover { transform: scale(1.1); }
+        .color-dot.active { 
+            transform: scale(1.25); 
+            box-shadow: 0 0 0 2px var(--env-bg), 0 0 0 4px var(--env-text);
+            z-index: 10;
+        }
+        
+        .dot-1 { background: linear-gradient(135deg, #ff2d85 50%, #00f2ff 50%); }
+        .dot-2 { background: linear-gradient(135deg, #ff3b30 50%, #ffcc00 50%); } 
+        .dot-3 { background: linear-gradient(135deg, #ffd60a 50%, #bf5af2 50%); } 
+        .dot-4 { background: linear-gradient(135deg, #30d158 50%, #ff453a 50%); } 
+        .dot-5 { background: linear-gradient(135deg, #0a84ff 50%, #ff9f0a 50%); } 
+
+        /* --- Watch Body --- */
         .watch-viewport { 
             flex-grow: 1; 
             display: flex; 
@@ -123,9 +169,11 @@
             border-radius: 64px; border: 8px solid #1a1a1a;
             box-shadow: 0 0 0 1px rgba(255,255,255,0.05) inset, 0 50px 100px rgba(0,0,0,0.7);
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            overflow: hidden; transition: background-color var(--transition-speed) var(--easing);
+            overflow: hidden; 
+            transition: background-color var(--transition-speed) var(--easing);
         }
-        .mode-filled .watch-case { background-color: var(--flux-pink); }
+        
+        .mode-filled .watch-case { background-color: var(--flux-bg); }
         
         .date-info { 
             position: absolute; top: 38px; font-size: 13px; font-weight: 700; letter-spacing: 1.2px; z-index: 50; 
@@ -141,7 +189,7 @@
             display: flex; 
             flex-direction: column; 
             justify-content: center;
-            margin-top: 12px; 
+            margin-top: 12px;
         }
         .row { display: flex; justify-content: center; height: 130px; }
         
@@ -153,45 +201,36 @@
         }
         .digit-box { position: relative; width: 110px; height: 140px; display: flex; justify-content: center; align-items: center; }
 
-        /* 
-           [UPDATED] Filling Mode Shadows 
-           目標：像 Outline 一樣有強烈的立體陰影感
-        */
         .mode-filled .digit-base { 
             color: #ffffff; 
             -webkit-text-stroke: 0 transparent;
-            /* 雙重陰影：一層是深色投影製造立體感，一層是白色微光 */
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)) drop-shadow(0 0 8px rgba(255,255,255,0.3));
         }
         .mode-filled .digit-fill { 
             color: #000000; 
             -webkit-text-stroke: 0 transparent;
-            /* 填充部分的陰影，增加深度 */
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
         
-        /* Outline Mode Styles */
         .mode-outline .digit-base { color: transparent; -webkit-text-stroke: 1.5px var(--outline-dark); }
         .mode-outline .digit-fill { 
-            color: var(--flux-cyan); -webkit-text-stroke: 1px var(--flux-cyan); 
-            filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.6)); 
+            color: var(--flux-accent); 
+            -webkit-text-stroke: 1px var(--flux-accent); 
+            filter: drop-shadow(0 0 15px var(--flux-accent)); 
         }
 
-        /* --- Vertical Mask & Transitions --- */
         .vertical-mask { 
             position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; 
             overflow: hidden; 
             z-index: 20; 
             transition: background-color var(--transition-speed) ease,
-                        /* [NEW] Height transition for silky smooth drop from 100% to 0% */
                         height 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
-        .mode-filled .vertical-mask { background-color: var(--flux-cyan); }
+        .mode-filled .vertical-mask { background-color: var(--flux-accent); }
         
-        /* Horizontal Line for Outline Mode */
         .mode-outline .vertical-mask {
-            border-top: 2px solid var(--flux-cyan);
-            box-shadow: 0 -2px 10px rgba(0, 242, 255, 0.9);
+            border-top: 2px solid var(--flux-accent);
+            box-shadow: 0 -2px 10px var(--flux-accent); 
         }
 
         .mask-content-fix { 
@@ -217,7 +256,7 @@
         .social-link.instagram:hover svg { fill: #E4405F; }
     </style>
 </head>
-<body class="mode-filled">
+<body class="mode-filled theme-1">
     <div id="loader">
         <svg width="40" height="40" viewBox="0 0 50 50" fill="white">
             <path d="M25 2C12.3 2 2 12.3 2 25s10.3 23 23 23 23-10.3 23-23S37.7 2 25 2zm0 42c-10.5 0-19-8.5-19-19S14.5 6 25 6s19 8.5 19 19-8.5 19-19 19z"/>
@@ -226,6 +265,7 @@
             <div class="loading-bar-fill" id="loading-fill"></div>
         </div>
     </div>
+
     <div id="main-content">
         <div class="controls-wrapper">
             <div class="control-item">
@@ -242,7 +282,18 @@
                     <button class="btn" id="btn-outline" onclick="setStyle('outline')">OUTLINE</button>
                 </div>
             </div>
+            <div class="control-item">
+                <div class="label">Colorways</div>
+                <div class="color-group">
+                    <button class="color-dot dot-1 active" onclick="setTheme(1)" title="Original (Pink / Cyan)"></button>
+                    <button class="color-dot dot-2" onclick="setTheme(2)" title="Magma (Red / Yellow)"></button>
+                    <button class="color-dot dot-3" onclick="setTheme(3)" title="Lakers (Yellow / Purple)"></button>
+                    <button class="color-dot dot-4" onclick="setTheme(4)" title="Watermelon (Green / Red)"></button>
+                    <button class="color-dot dot-5" onclick="setTheme(5)" title="Knicks (Blue / Orange)"></button>
+                </div>
+            </div>
         </div>
+        
         <div class="watch-viewport">
             <div class="watch-scale-container" id="watch-scaler">
                 <div class="watch-case">
@@ -259,6 +310,7 @@
                             <div class="digit-box"><div class="digit-style digit-base" id="m2-b">0</div></div>
                         </div>
                     </div>
+
                     <div class="vertical-mask" id="flux-mask">
                         <div class="mask-content-fix">
                             <div class="flux-container">
@@ -277,34 +329,52 @@
             </div>
         </div>
     </div>
+    
     <div class="social-sidebar">
         <a href="https://ansonlct.github.io" target="_blank" class="social-link github" title="GitHub">
             <svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
         </a>
         <a href="https://www.instagram.com/7lv" target="_blank" class="social-link instagram" title="Instagram">
-            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
         </a>
     </div>
+
     <script>
+        // --- 修正後的 Loader 邏輯 ---
         window.addEventListener('load', () => {
             const fill = document.getElementById('loading-fill');
             const loader = document.getElementById('loader');
             const main = document.getElementById('main-content');
             
-            void fill.offsetWidth; 
-            fill.style.width = '100%';
+            // 1. 強制確保寬度從 0 開始
+            fill.style.width = '0%';
             
+            // 2. 稍微延遲 50ms 再設定 100%，確保瀏覽器有時間渲染 0% 的狀態
+            // 這是修復「進度條不跑」的關鍵
             setTimeout(() => {
+                fill.style.width = '100%';
+            }, 50);
+            
+            // 3. 等待動畫結束 (2200ms)
+            setTimeout(() => {
+                // 隱藏 Loader
                 loader.style.opacity = '0';
-                loader.style.pointerEvents = 'none';
+                loader.style.pointerEvents = 'none'; // 讓滑鼠可以穿透
+                
+                // 顯示主內容
                 main.style.opacity = '1';
                 
+                // 初始化並開始時鐘
                 handleResize(); 
                 requestAnimationFrame(clockLoop);
                 
-                setTimeout(() => loader.remove(), 1000);
+                // 移除 Loader 元素釋放記憶體
+                setTimeout(() => {
+                    if(loader) loader.remove();
+                }, 1000);
             }, 2200);
         });
+
         function handleResize() {
             const scaler = document.getElementById('watch-scaler');
             const controls = document.querySelector('.controls-wrapper');
@@ -314,36 +384,63 @@
             const baseH = 390;
             const screenW = window.innerWidth;
             const screenH = window.innerHeight;
+            
             const controlsRect = controls.getBoundingClientRect();
             const controlsBottom = controlsRect.bottom;
+            
             const availableH = screenH - controlsBottom - padding;
             const availableW = screenW - (padding * 2);
+            
             let scale = Math.min(availableW / baseW, availableH / baseH);
             
             if (scale > 1.2) scale = 1.2; 
             if (scale < 0.2) scale = 0.2;
+            
             scaler.style.transform = `scale(${scale})`;
         }
+        
         window.addEventListener('resize', handleResize);
         window.addEventListener('orientationchange', () => setTimeout(handleResize, 100));
+        
         function setEnv(env) {
             document.body.classList.toggle('env-light', env === 'light');
             document.getElementById('env-light-btn').classList.toggle('active', env === 'light');
             document.getElementById('env-dark-btn').classList.toggle('active', env === 'dark');
+            setStyle(document.body.classList.contains('mode-filled') ? 'filled' : 'outline'); 
         }
+        
         function setStyle(mode) {
             const isLight = document.body.classList.contains('env-light');
-            document.body.className = isLight ? `mode-${mode} env-light` : `mode-${mode}`;
+            const currentClasses = Array.from(document.body.classList).filter(c => c.startsWith('theme-'));
+            
+            let newClass = `mode-${mode}`;
+            if (isLight) newClass += ' env-light';
+            if (currentClasses.length > 0) newClass += ` ${currentClasses[0]}`;
+            
+            document.body.className = newClass;
+            
             document.getElementById('btn-filled').classList.toggle('active', mode === 'filled');
             document.getElementById('btn-outline').classList.toggle('active', mode === 'outline');
         }
+        
+        function setTheme(id) {
+            document.body.classList.remove('theme-1', 'theme-2', 'theme-3', 'theme-4', 'theme-5');
+            document.body.classList.add(`theme-${id}`);
+            
+            document.querySelectorAll('.color-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index + 1 === id);
+            });
+        }
+        
         function clockLoop() {
-            const now = new Date();
+            const now = new Date(); 
             
             const weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
             const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} (${weekdays[now.getDay()]})`;
+            
             const dateEl = document.getElementById('full-date');
             if (dateEl.textContent !== dateStr) dateEl.textContent = dateStr;
+            
             const hStr = now.getHours().toString().padStart(2, '0');
             const mStr = now.getMinutes().toString().padStart(2, '0');
             
@@ -351,12 +448,17 @@
             updateDigit('h2', hStr[1]);
             updateDigit('m1', mStr[0]);
             updateDigit('m2', mStr[1]);
+            
             const s = now.getSeconds();
             const ms = now.getMilliseconds();
+            
             const progress = ((s + ms / 1000) / 60) * 100;
+            
             document.getElementById('flux-mask').style.height = `${progress}%`;
+            
             requestAnimationFrame(clockLoop);
         }
+        
         function updateDigit(id, val) {
             const elB = document.getElementById(id + '-b');
             const elF = document.getElementById(id + '-f');
