@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Apple Clock</title>
+    <title>Apple Clock Flux Final v2</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -81,7 +81,6 @@
         .loading-bar-fill { 
             width: 0%; height: 100%; background: #fff; 
             border-radius: 10px;
-            /* 確保 transition 設定正確 */
             transition: width 2s cubic-bezier(0.22, 1, 0.36, 1); 
         }
 
@@ -241,14 +240,27 @@
 
         .bottom-line { position: absolute; bottom: 28px; width: 32px; height: 4px; background-color: rgba(255,255,255,0.15); border-radius: 10px; z-index: 60; mix-blend-mode: overlay; }
         
-        .social-sidebar { position: absolute; right: 25px; bottom: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 2000; }
+        /* 
+           [UPDATED] Social Sidebar Layout 
+           - flex-direction: row (橫排)
+           - bottom: 20px, right: 20px (靠下靠右，不擋錶面)
+        */
+        .social-sidebar { 
+            position: absolute; 
+            right: 20px; 
+            bottom: 20px; 
+            display: flex; 
+            flex-direction: row; /* 橫排 */
+            gap: 15px; 
+            z-index: 2000; 
+        }
         .social-link { 
             width: 48px; height: 48px; border-radius: 14px; display: flex; justify-content: center; align-items: center; text-decoration: none; 
             background: var(--env-panel-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); 
             border: 1px solid var(--env-panel-border); box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); 
         }
-        .social-link:hover { transform: scale(1.15) translateX(-8px); background: rgba(255, 255, 255, 0.15); box-shadow: 0 15px 35px rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.3); }
+        .social-link:hover { transform: scale(1.15) translateY(-5px); /* 輕微上浮 */ background: rgba(255, 255, 255, 0.15); box-shadow: 0 15px 35px rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.3); }
         body.env-light .social-link:hover { background: rgba(255, 255, 255, 0.9); }
         .social-link svg { width: 24px; height: 24px; fill: var(--env-text); transition: fill 0.3s ease; }
         .social-link.github:hover svg { fill: var(--env-btn-active); }
@@ -340,38 +352,24 @@
     </div>
 
     <script>
-        // --- 修正後的 Loader 邏輯 ---
         window.addEventListener('load', () => {
             const fill = document.getElementById('loading-fill');
             const loader = document.getElementById('loader');
             const main = document.getElementById('main-content');
             
-            // 1. 強制確保寬度從 0 開始
             fill.style.width = '0%';
             
-            // 2. 稍微延遲 50ms 再設定 100%，確保瀏覽器有時間渲染 0% 的狀態
-            // 這是修復「進度條不跑」的關鍵
             setTimeout(() => {
                 fill.style.width = '100%';
             }, 50);
             
-            // 3. 等待動畫結束 (2200ms)
             setTimeout(() => {
-                // 隱藏 Loader
                 loader.style.opacity = '0';
-                loader.style.pointerEvents = 'none'; // 讓滑鼠可以穿透
-                
-                // 顯示主內容
+                loader.style.pointerEvents = 'none'; 
                 main.style.opacity = '1';
-                
-                // 初始化並開始時鐘
                 handleResize(); 
                 requestAnimationFrame(clockLoop);
-                
-                // 移除 Loader 元素釋放記憶體
-                setTimeout(() => {
-                    if(loader) loader.remove();
-                }, 1000);
+                setTimeout(() => { if(loader) loader.remove(); }, 1000);
             }, 2200);
         });
 
@@ -412,13 +410,10 @@
         function setStyle(mode) {
             const isLight = document.body.classList.contains('env-light');
             const currentClasses = Array.from(document.body.classList).filter(c => c.startsWith('theme-'));
-            
             let newClass = `mode-${mode}`;
             if (isLight) newClass += ' env-light';
             if (currentClasses.length > 0) newClass += ` ${currentClasses[0]}`;
-            
             document.body.className = newClass;
-            
             document.getElementById('btn-filled').classList.toggle('active', mode === 'filled');
             document.getElementById('btn-outline').classList.toggle('active', mode === 'outline');
         }
@@ -426,7 +421,6 @@
         function setTheme(id) {
             document.body.classList.remove('theme-1', 'theme-2', 'theme-3', 'theme-4', 'theme-5');
             document.body.classList.add(`theme-${id}`);
-            
             document.querySelectorAll('.color-dot').forEach((dot, index) => {
                 dot.classList.toggle('active', index + 1 === id);
             });
