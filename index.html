@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Apple Clock</title>
+    <title>Apple Clock Flux Enhanced</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,12 +26,9 @@
             --transition-speed: 0.6s;
             --easing: cubic-bezier(0.25, 1, 0.5, 1);
             
-            /* --- 這裡控制控制面板與手錶之間的間距 --- */
             --controls-to-watch-gap: 30px; 
-            /* --- 這裡控制頂部距離 --- */
             --top-safe-area: 45px;
         }
-
         body.env-light {
             --env-bg: #f2f2f7;
             --env-panel-bg: rgba(255, 255, 255, 0.65);
@@ -40,9 +37,7 @@
             --env-btn-active: #000000;
             --env-btn-text: #fff;
         }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
         body {
             margin: 0; padding: 0;
             display: flex; flex-direction: column; align-items: center;
@@ -52,7 +47,6 @@
             transition: background-color var(--transition-speed) var(--easing);
             overflow: hidden; position: fixed;
         }
-
         #loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000;
@@ -71,7 +65,6 @@
             transition: width 2s cubic-bezier(0.22, 1, 0.36, 1); 
             will-change: width;
         }
-
         #main-content {
             opacity: 0;
             transition: opacity 1.2s ease-out;
@@ -79,16 +72,15 @@
             width: 100%; height: 100%;
             position: relative;
         }
-
-        /* --- UI 控制元件佈局調整 --- */
+        
+        /* --- UI Controls --- */
         .controls-wrapper {
             position: relative; 
             margin-top: var(--top-safe-area); 
-            margin-bottom: var(--controls-to-watch-gap); /* 這裡控制下方的間距 */
+            margin-bottom: var(--controls-to-watch-gap);
             z-index: 1000;
             display: flex; flex-direction: column; gap: 14px; flex-shrink: 0;
         }
-        
         .control-item { display: flex; flex-direction: column; align-items: center; }
         .label { font-size: 10px; font-weight: 800; color: var(--env-text); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; transition: color 0.3s; }
         .control-group {
@@ -105,29 +97,27 @@
             transition: all 0.4s var(--easing);
         }
         .btn.active { background: var(--env-btn-active); color: var(--env-btn-text); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-
-        /* 視窗區域 */
+        
+        /* Watch Viewport */
         .watch-viewport { 
             flex-grow: 1; 
             display: flex; 
             justify-content: center; 
-            align-items: flex-start; /* 改為 flex-start 配合 margin-top 比較精確控制 */
+            align-items: flex-start; 
             width: 100%; 
             overflow: visible; 
             position: relative; 
         }
-
         .watch-scale-container { 
             width: 320px; 
             height: 390px; 
-            transform-origin: top center; /* 縮放起點改為頂部，這樣間距調整會更直覺 */
+            transform-origin: top center; 
             transition: transform 0.1s linear; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             will-change: transform; 
         }
-
         .watch-case {
             position: relative; width: 320px; height: 390px; background-color: #000;
             border-radius: 64px; border: 8px solid #1a1a1a;
@@ -136,28 +126,82 @@
             overflow: hidden; transition: background-color var(--transition-speed) var(--easing);
         }
         .mode-filled .watch-case { background-color: var(--flux-pink); }
-
-        .date-info { position: absolute; top: 38px; font-size: 13px; font-weight: 700; letter-spacing: 1.2px; z-index: 50; transition: color var(--transition-speed) ease; }
+        
+        .date-info { 
+            position: absolute; top: 38px; font-size: 13px; font-weight: 700; letter-spacing: 1.2px; z-index: 50; 
+            transition: color var(--transition-speed) ease; 
+        }
         .mode-filled .date-info { color: rgba(255,255,255,0.9); }
         .mode-outline .date-info { color: #555; }
 
-        .flux-container { position: relative; width: 260px; height: 280px; display: flex; flex-direction: column; justify-content: center; }
+        .flux-container { 
+            position: relative; 
+            width: 260px; 
+            height: 280px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center;
+            margin-top: 12px; 
+        }
         .row { display: flex; justify-content: center; height: 130px; }
-        .digit-style { font-size: 180px; font-weight: 900; line-height: 0.8; letter-spacing: -14px; font-variant-numeric: tabular-nums; transition: color var(--transition-speed) ease, -webkit-text-stroke var(--transition-speed) ease; }
+        
+        .digit-style { 
+            font-size: 180px; font-weight: 900; line-height: 0.8; letter-spacing: -14px; 
+            font-variant-numeric: tabular-nums; 
+            transition: color var(--transition-speed) ease, -webkit-text-stroke var(--transition-speed) ease; 
+            transform: translateY(4px);
+        }
         .digit-box { position: relative; width: 110px; height: 140px; display: flex; justify-content: center; align-items: center; }
 
-        .mode-filled .digit-base { color: #ffffff; -webkit-text-stroke: 0 transparent; }
-        .mode-outline .digit-base { color: transparent; -webkit-text-stroke: 1.5px var(--outline-dark); }
-
-        .vertical-mask { position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; overflow: hidden; z-index: 20; transition: background-color var(--transition-speed) ease; }
-        .mode-filled .vertical-mask { background-color: var(--flux-cyan); }
-
-        .mask-content-fix { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 320px; height: 390px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .mode-filled .digit-fill { color: #000000; -webkit-text-stroke: 0 transparent; }
-        .mode-outline .digit-fill { color: var(--flux-cyan); -webkit-text-stroke: 1px var(--flux-cyan); filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.6)); }
+        /* 
+           [UPDATED] Filling Mode Shadows 
+           目標：像 Outline 一樣有強烈的立體陰影感
+        */
+        .mode-filled .digit-base { 
+            color: #ffffff; 
+            -webkit-text-stroke: 0 transparent;
+            /* 雙重陰影：一層是深色投影製造立體感，一層是白色微光 */
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)) drop-shadow(0 0 8px rgba(255,255,255,0.3));
+        }
+        .mode-filled .digit-fill { 
+            color: #000000; 
+            -webkit-text-stroke: 0 transparent;
+            /* 填充部分的陰影，增加深度 */
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
         
-        .bottom-line { position: absolute; bottom: 28px; width: 32px; height: 4px; background-color: rgba(255,255,255,0.15); border-radius: 10px; z-index: 60; mix-blend-mode: overlay; }
+        /* Outline Mode Styles */
+        .mode-outline .digit-base { color: transparent; -webkit-text-stroke: 1.5px var(--outline-dark); }
+        .mode-outline .digit-fill { 
+            color: var(--flux-cyan); -webkit-text-stroke: 1px var(--flux-cyan); 
+            filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.6)); 
+        }
 
+        /* --- Vertical Mask & Transitions --- */
+        .vertical-mask { 
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; 
+            overflow: hidden; 
+            z-index: 20; 
+            transition: background-color var(--transition-speed) ease,
+                        /* [NEW] Height transition for silky smooth drop from 100% to 0% */
+                        height 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .mode-filled .vertical-mask { background-color: var(--flux-cyan); }
+        
+        /* Horizontal Line for Outline Mode */
+        .mode-outline .vertical-mask {
+            border-top: 2px solid var(--flux-cyan);
+            box-shadow: 0 -2px 10px rgba(0, 242, 255, 0.9);
+        }
+
+        .mask-content-fix { 
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); 
+            width: 320px; height: 390px; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; 
+        }
+
+        .bottom-line { position: absolute; bottom: 28px; width: 32px; height: 4px; background-color: rgba(255,255,255,0.15); border-radius: 10px; z-index: 60; mix-blend-mode: overlay; }
+        
         .social-sidebar { position: absolute; right: 25px; bottom: 30px; display: flex; flex-direction: column; gap: 15px; z-index: 2000; }
         .social-link { 
             width: 48px; height: 48px; border-radius: 14px; display: flex; justify-content: center; align-items: center; text-decoration: none; 
@@ -174,7 +218,6 @@
     </style>
 </head>
 <body class="mode-filled">
-
     <div id="loader">
         <svg width="40" height="40" viewBox="0 0 50 50" fill="white">
             <path d="M25 2C12.3 2 2 12.3 2 25s10.3 23 23 23 23-10.3 23-23S37.7 2 25 2zm0 42c-10.5 0-19-8.5-19-19S14.5 6 25 6s19 8.5 19 19-8.5 19-19 19z"/>
@@ -183,7 +226,6 @@
             <div class="loading-bar-fill" id="loading-fill"></div>
         </div>
     </div>
-
     <div id="main-content">
         <div class="controls-wrapper">
             <div class="control-item">
@@ -201,7 +243,6 @@
                 </div>
             </div>
         </div>
-
         <div class="watch-viewport">
             <div class="watch-scale-container" id="watch-scaler">
                 <div class="watch-case">
@@ -218,7 +259,6 @@
                             <div class="digit-box"><div class="digit-style digit-base" id="m2-b">0</div></div>
                         </div>
                     </div>
-
                     <div class="vertical-mask" id="flux-mask">
                         <div class="mask-content-fix">
                             <div class="flux-container">
@@ -237,7 +277,6 @@
             </div>
         </div>
     </div>
-
     <div class="social-sidebar">
         <a href="https://ansonlct.github.io" target="_blank" class="social-link github" title="GitHub">
             <svg viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
@@ -246,7 +285,6 @@
             <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
         </a>
     </div>
-
     <script>
         window.addEventListener('load', () => {
             const fill = document.getElementById('loading-fill');
@@ -267,7 +305,6 @@
                 setTimeout(() => loader.remove(), 1000);
             }, 2200);
         });
-
         function handleResize() {
             const scaler = document.getElementById('watch-scaler');
             const controls = document.querySelector('.controls-wrapper');
@@ -277,38 +314,29 @@
             const baseH = 390;
             const screenW = window.innerWidth;
             const screenH = window.innerHeight;
-
             const controlsRect = controls.getBoundingClientRect();
             const controlsBottom = controlsRect.bottom;
-
-            // 計算扣除控制面板後剩餘的高度
             const availableH = screenH - controlsBottom - padding;
             const availableW = screenW - (padding * 2);
-
             let scale = Math.min(availableW / baseW, availableH / baseH);
             
-            if (scale > 1.2) scale = 1.2; // 稍微允許放大一點
+            if (scale > 1.2) scale = 1.2; 
             if (scale < 0.2) scale = 0.2;
-
             scaler.style.transform = `scale(${scale})`;
         }
-
         window.addEventListener('resize', handleResize);
         window.addEventListener('orientationchange', () => setTimeout(handleResize, 100));
-
         function setEnv(env) {
             document.body.classList.toggle('env-light', env === 'light');
             document.getElementById('env-light-btn').classList.toggle('active', env === 'light');
             document.getElementById('env-dark-btn').classList.toggle('active', env === 'dark');
         }
-
         function setStyle(mode) {
             const isLight = document.body.classList.contains('env-light');
             document.body.className = isLight ? `mode-${mode} env-light` : `mode-${mode}`;
             document.getElementById('btn-filled').classList.toggle('active', mode === 'filled');
             document.getElementById('btn-outline').classList.toggle('active', mode === 'outline');
         }
-
         function clockLoop() {
             const now = new Date();
             
@@ -316,7 +344,6 @@
             const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} (${weekdays[now.getDay()]})`;
             const dateEl = document.getElementById('full-date');
             if (dateEl.textContent !== dateStr) dateEl.textContent = dateStr;
-
             const hStr = now.getHours().toString().padStart(2, '0');
             const mStr = now.getMinutes().toString().padStart(2, '0');
             
@@ -324,15 +351,12 @@
             updateDigit('h2', hStr[1]);
             updateDigit('m1', mStr[0]);
             updateDigit('m2', mStr[1]);
-
             const s = now.getSeconds();
             const ms = now.getMilliseconds();
             const progress = ((s + ms / 1000) / 60) * 100;
             document.getElementById('flux-mask').style.height = `${progress}%`;
-
             requestAnimationFrame(clockLoop);
         }
-
         function updateDigit(id, val) {
             const elB = document.getElementById(id + '-b');
             const elF = document.getElementById(id + '-f');
@@ -342,6 +366,3 @@
     </script>
 </body>
 </html>
-
-
-
