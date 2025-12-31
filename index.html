@@ -2,10 +2,10 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Apple Clock Flux Final v2</title>
+    <title>Apple Clock Flux iOS Optimized</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,7 +55,15 @@
         body {
             margin: 0; padding: 0;
             display: flex; flex-direction: column; align-items: center;
-            height: 100vh; width: 100vw;
+            /* 
+               [iOS Fix] 
+               1. Fallback to 100vh for older browsers
+               2. Use 100svh (Small Viewport Height) to exclude address bar area 
+            */
+            height: 100vh; 
+            height: 100svh; 
+            
+            width: 100vw;
             background-color: var(--env-bg);
             font-family: var(--font-family);
             transition: background-color var(--transition-speed) var(--easing);
@@ -95,7 +103,8 @@
         /* --- Controls --- */
         .controls-wrapper {
             position: relative; 
-            margin-top: var(--top-safe-area); 
+            /* [iOS Fix] Add safe area to top padding as well */
+            margin-top: max(var(--top-safe-area), env(safe-area-inset-top) + 20px); 
             margin-bottom: var(--controls-to-watch-gap);
             z-index: 1000;
             display: flex; flex-direction: column; gap: 12px; flex-shrink: 0;
@@ -241,16 +250,16 @@
         .bottom-line { position: absolute; bottom: 28px; width: 32px; height: 4px; background-color: rgba(255,255,255,0.15); border-radius: 10px; z-index: 60; mix-blend-mode: overlay; }
         
         /* 
-           [UPDATED] Social Sidebar Layout 
-           - flex-direction: row (橫排)
-           - bottom: 20px, right: 20px (靠下靠右，不擋錶面)
+           [iOS Fix] Social Sidebar 
+           - Uses 'bottom: calc(25px + env(safe-area-inset-bottom))' to clear Home Indicator and Address Bar
         */
         .social-sidebar { 
             position: absolute; 
             right: 20px; 
-            bottom: 20px; 
+            /* 這裡是最重要的修正：基礎距離 + iOS 安全區域距離 */
+            bottom: calc(25px + env(safe-area-inset-bottom)); 
             display: flex; 
-            flex-direction: row; /* 橫排 */
+            flex-direction: row; 
             gap: 15px; 
             z-index: 2000; 
         }
@@ -260,7 +269,7 @@
             border: 1px solid var(--env-panel-border); box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); 
         }
-        .social-link:hover { transform: scale(1.15) translateY(-5px); /* 輕微上浮 */ background: rgba(255, 255, 255, 0.15); box-shadow: 0 15px 35px rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.3); }
+        .social-link:hover { transform: scale(1.15) translateY(-5px); background: rgba(255, 255, 255, 0.15); box-shadow: 0 15px 35px rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.3); }
         body.env-light .social-link:hover { background: rgba(255, 255, 255, 0.9); }
         .social-link svg { width: 24px; height: 24px; fill: var(--env-text); transition: fill 0.3s ease; }
         .social-link.github:hover svg { fill: var(--env-btn-active); }
